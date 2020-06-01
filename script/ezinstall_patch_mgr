@@ -177,10 +177,19 @@ call_ezapi_verify_installed()
 {
   echo "connector_id is $1"
   echo "installed is $2"
-  # api_server='http://api.netway.ezyadmin.com' # 192.168.100.80:8888
-  api_server='http://192.168.100.80:8888' # 192.168.100.80:8888
+  api_server='https://api.netway.ezyadmin.com'
   hostname=`hostname -f`
   url='${api_server}//verify/client/connector/${1}/hostname/{hostname}/installed/${2}'
+  curl -H "Content-Type: application/json" -X PUT ${url}
+}
+
+call_ezapi_verify_compatible()
+{
+  echo "connector_id is $1"
+  echo "installed is $2"
+  api_server='https://api.netway.ezyadmin.com'
+  hostname=`hostname -f`
+  url='${api_server}//verify/client/connector/${1}/hostname/{hostname}/compatible/${2}'
   curl -H "Content-Type: application/json" -X PUT ${url}
 }
 
