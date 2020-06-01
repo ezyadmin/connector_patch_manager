@@ -54,5 +54,6 @@ Patch Manager for manual installation
   ```
 
 ## Configuration
-
+  
 ## Testing
+  
