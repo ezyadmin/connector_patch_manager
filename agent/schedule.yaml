@@ -1,0 +1,11 @@
+package :
+  - yum
+#  - cpan
+  - pear
+  - cloudlinux
+  - kernel
+  - source
+schedule : 
+  - every : time
+  - from : 01:00
+  - to : 02:00
