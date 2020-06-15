@@ -9,8 +9,6 @@ green=`tput setaf 2`
 reset=`tput sgr0`
 # echo "${red}red text ${green}green ${reset}text"
 
-
-
 Check_Support()
 {
   echo "${green}------------- Check support -------------${reset}"
