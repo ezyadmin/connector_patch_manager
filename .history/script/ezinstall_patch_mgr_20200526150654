@@ -1,0 +1,214 @@
+#!/usr/bin/env bash
+
+echo "Parameter arg: $1"
+INPUTKEY=$1
+
+# ========= variable ============
+DATE_NOW=$(date '+%d/%m/%Y %H:%M:%S')
+
+red=`tput setaf 1`
+green=`tput setaf 2`
+reset=`tput sgr0`
+
+#
+OSNAME=`perl ../agent/get_os.pl`
+OSVERSION=""
+if [[ "${OSNAME}" == "centos" ]] ;then
+  OSNAME="CentOS"
+  OSVERSION=`rpm -q --queryformat '%{VERSION}' centos-release`
+elif [[ "${OSNAME}" == "redhat" ]]; then
+  OSNAME="RedHat"
+  OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release`
+elif [[ "${OSNAME}" == "cloudlinux" ]]; then
+  OSNAME="CloudLinux"
+  OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release`
+else
+  echo "${red}Error : Operating system is not support.${reset}"
+  echo "${red}OS : ${OSNAME}${reset}"
+  exit;
+fi
+
+copy_to_ezydir()
+{
+  mkdir -p /usr/local/ezyadmin
+  cd /usr/local/ezyadmin
+  cp -af ../agent /usr/local/ezyadmin/
+}
+
+setup_linux()
+{
+  echo "Setup Patch Manager for linux ..."
+  # 2. install connector
+  setup_respo
+  echo "$DATE_NOW" > /usr/local/ezyadmin/agent/linux
+  call_ezapi_verify_installed 5e0307987f0fc331388ff450 true
+}
+setup_cpanel()
+{
+  TMP_CPANEL=`/usr/local/cpanel/cpanel -V 2> /dev/null` || TMP_CPANEL=$?
+  if [ "${TMP_CPANEL}x" == "x" ] || [ "${TMP_CPANEL}" == "127" ]; then
+    echo "${red}Ignore : This server is not found cPanel/WHM.${reset}"
+    # call_ezapi_verify_installed 5c74c7ef3ae4f52ae9e1833c false
+    # exit;
+  else
+    echo "${green}Setup Patch Manager for cPanel/WHM ...${reset}"
+    echo "$DATE_NOW" > /usr/local/ezyadmin/agent/cpanel
+    call_ezapi_verify_installed 5c74c7ef3ae4f52ae9e1833c true
+  fi
+}
+setup_da()
+{
+  TMP_CPANEL=`/usr/local/cpanel/cpanel -V 2> /dev/null` || TMP_CPANEL=$?
+  if [ "${TMP_CPANEL}x" == "x" ] || [ "${TMP_CPANEL}" == "127" ]; then
+    echo "${red}Ignore : This server is not found Direct Admin.${reset}"
+    # exit;
+  else
+    echo "${green}Setup Patch Manager for Direct Admin ...${reset}"
+    echo "$DATE_NOW" > /usr/local/ezyadmin/agent/da
+    call_ezapi_verify_installed 5ca72512242546043ede359c true
+  fi
+}
+setup_cloudLinux()
+{
+  DETECTCLOUDLINUX=`yum list installed -d3 | grep "cloudlinux-release"`
+  if [ "${DETECTCLOUDLINUX}x" != "x" ];	then
+    echo "${green}Setup Patch Manager for CloudLinux ...${reset}"
+    echo "$DATE_NOW" > /usr/local/ezyadmin/agent/cloudLinux
+    call_ezapi_verify_installed 5d639f97a4b5faf008ba16e2 true
+  else
+    echo "${red}Ignore : This server is not found CloudLinux.${reset}"
+  fi
+}
+
+check_support()
+{
+  echo "${green}------------- Check support -------------${reset}"
+  # TMP_YUM=`which yum 2> /dev/null` || TMP_YUM=$?
+  TMP_YUM=`yum -v 2> /dev/null` || TMP_YUM=$?
+  if [ "${TMP_YUM}x" == "x" ] || [ "${TMP_YUM}" == "127" ]; then
+    echo "${red}Error : Operating system is not support.${reset}"
+    exit;
+  fi
+  echo "${green}TMP_YUM ${TMP_YUM}="
+
+  OSNAME=`perl ../agent/get_os.pl`
+  OSVERSION=""
+  if [[ "${OSNAME}" == "centos" ]] ;then
+    OSNAME="CentOS"
+    OSVERSION=`rpm -q --queryformat '%{VERSION}' centos-release`
+  elif [[ "${OSNAME}" == "redhat" ]]; then
+    OSNAME="RedHat"
+    OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release`
+  elif [[ "${OSNAME}" == "cloudlinux" ]]; then
+    OSNAME="CloudLinux"
+    OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release`
+  else
+    echo "${red}Error : Operating system is not support.${reset}"
+    echo "${red}OS : ${OSNAME}${reset}"
+    exit;
+  fi
+}
+
+setup_respo6()
+{
+  cp -f ../config/fusioninventory.repo_v6 /etc/yum.repos.d/ez_fusioninventory.repo
+  yum -y install fusioninventory-agent fusioninventory-agent-task-inventory
+}
+
+setup_respo7()
+{
+  cp -f ../config/fusioninventory.repo_v7 /etc/yum.repos.d/ez_fusioninventory.repo
+  yum -y install fusioninventory-agent fusioninventory-agent-task-inventory
+}
+
+setup_respo8()
+{
+  subscription-manager repos --enable "codeready-builder-for-rhel-8-$(arch)-rpms"
+  dnf config-manager --set-enabled PowerTools
+  dnf install fusioninventory-agent fusioninventory-agent-task-inventory
+}
+
+setup_respo()
+{
+  if [[ "${OSVERSION}" -lt "6" ]] ;then
+    echo "${red}Error : Operating system is not support.${reset}"
+    echo "${red}OS : ${OSNAME} ${OSVERSION}${reset}"
+    exit;
+  elif [[ "${OSVERSION}" -eq "6" ]]; then
+    setup_respo6
+  elif [[ "${OSVERSION}" -eq "7" ]]; then
+    setup_respo7
+  elif [[ "${OSVERSION}" -eq "8" ]]; then
+    setup_respo8
+  else
+    echo "${red}Error : Operating system is not support.${reset}"
+    echo "${red}OS : ${OSNAME}${reset}"
+    echo "Please concact us."
+    exit;
+  fi
+}
+
+init_daemon(){
+  cat /dev/null > /var/log/ezyadmind.err
+  chmod 755 /usr/local/ezyadmin/agent/ezyadmin_agent
+  if [[ "${OSVERSION}" -eq "6" ]] ;then
+    # /agent/ezyadmind dest=/etc/init.d/ezyadmind
+    cp -f ../agent/ezyadmind /etc/init.d/ezyadmind
+    chmod 755 /etc/init.d/ezyadmind
+    chown root:root /etc/init.d/ezyadmind
+    chkconfig --add ezyadmind
+    chkconfig ezyadmind on
+    /etc/init.d/ezyadmind stop
+    /etc/init.d/ezyadmind start
+  elif [[ "${OSVERSION}" -ge "7" ]]; then
+    # /agent/ezyadmin.service dest=/etc/systemd/system/ezyadmin.service
+    cp -f ../agent/ezyadmin.service /etc/systemd/system/ezyadmin.service
+    chmod 755 /etc/systemd/system/ezyadmin.service
+    chown root:root /etc/systemd/system/ezyadmin.service
+    systemctl daemon-reload
+    systemctl enable ezyadmin.service
+    systemctl stop ezyadmin.service
+    systemctl start ezyadmin.service
+  else
+    
+}
+
+call_ezapi_verify_installed()
+{
+  echo "connector_id is $1"
+  echo "installed is $2"
+  # api_server='http://api.netway.ezyadmin.com' # 192.168.100.80:8888
+  api_server='http://192.168.100.80:8888' # 192.168.100.80:8888
+  hostname=`hostname -f`
+  url='${api_server}//verify/client/connector/${1}/hostname/{hostname}/installed/${2}'
+  curl -H "Content-Type: application/json" -X PUT ${url}
+}
+
+# ========== main ==================================
+check_support
+
+# === install && enable connector
+if [[ "${INPUTKEY}" == "--all" ]] ;then
+  setup_linux
+  setup_cpanel
+  setup_da
+  setup_cloudLinux
+elif [[ "${INPUTKEY}"== "--linux" ]]; then
+  setup_linux
+elif [[ "${INPUTKEY}"== "--cpanel" ]]; then
+  setup_cpanel
+elif [[ "${INPUTKEY}"== "--da" ]]; then
+  setup_da
+elif [[ "${INPUTKEY}"== "--cloudLinux" ]]; then
+  setup_cloudLinux
+else
+  echo "${red}Error : Operating system is not support.${reset}"
+  echo "${red}OS : ${OSNAME}${reset}"
+  echo "Please concact us."
+  exit;
+fi
+
+# === init daemon
+init_daemon
+# ===  configuration
+cp -f ../config/agent.cfg /etc/fusioninventory/agent.cfg

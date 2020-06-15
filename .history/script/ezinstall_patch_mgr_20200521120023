@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+
+echo "Parameter arg: $1"
+INPUTKEY=$1
+
+# ========= variable ============
+DATE_NOW=$(date '+%d/%m/%Y %H:%M:%S')
+
+#
+OSNAME=`perl ../agent/get_os.pl`
+OSVERSION=""
+if [[ "${OSNAME}" == "centos" ]] ;then
+  OSNAME="CentOS"
+  OSVERSION=`rpm -q --queryformat '%{VERSION}' centos-release`
+elif [[ "${OSNAME}" == "redhat" ]]; then
+  OSNAME="RedHat"
+  OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release`
+elif [[ "${OSNAME}" == "cloudlinux" ]]; then
+  OSNAME="CloudLinux"
+  OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release`
+else
+  echo "${red}Error : Operating system is not support.${reset}"
+  echo "${red}OS : ${OSNAME}${reset}"
+  exit;
+fi
+
+copy_to_ezydir()
+{
+  mkdir -p /usr/local/ezyadmin
+  cd /usr/local/ezyadmin
+  cp -af ../agent /usr/local/ezyadmin/
+}
+
+setup_linux()
+{
+  echo "Setup Patch Manager for linux ..."
+  # 1. dependency
+  
+  # 2. install connector
+  setup_respo
+  echo "$DATE_NOW" > /usr/local/ezyadmin/agent/linux
+}
+setup_cpanel()
+{
+  echo "Setup Patch Manager for linux ..."
+  echo "$DATE_NOW" > /usr/local/ezyadmin/agent/cpanel
+}
+setup_da()
+{
+  echo "Setup Patch Manager for linux ..."
+  echo "$DATE_NOW" > /usr/local/ezyadmin/agent/da
+}
+setup_cloudLinux()
+{
+  echo "Setup Patch Manager for linux ..."
+  echo "$DATE_NOW" > /usr/local/ezyadmin/agent/cloudLinux
+}
+
+Check_Support()
+{
+  echo "${green}------------- Check support -------------${reset}"
+  # TMP_YUM=`which yum 2> /dev/null` || TMP_YUM=$?
+  TMP_YUM=`yum -v 2> /dev/null` || TMP_YUM=$?
+  if [ "${TMP_YUM}x" == "x" ] || [ "${TMP_YUM}" == "127" ]; then
+    echo "${red}Error : Operating system is not support.${reset}"
+    exit;
+  fi
+  echo "${green}TMP_YUM ${TMP_YUM}="
+
+  OSNAME=`perl ../agent/get_os.pl`
+  OSVERSION=""
+  if [[ "${OSNAME}" == "centos" ]] ;then
+    OSNAME="CentOS"
+    OSVERSION=`rpm -q --queryformat '%{VERSION}' centos-release`
+  elif [[ "${OSNAME}" == "redhat" ]]; then
+    OSNAME="RedHat"
+    OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release`
+  elif [[ "${OSNAME}" == "cloudlinux" ]]; then
+    OSNAME="CloudLinux"
+    OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release`
+  else
+    echo "${red}Error : Operating system is not support.${reset}"
+    echo "${red}OS : ${OSNAME}${reset}"
+    exit;
+  fi
+}
+
+setup_respo6()
+{
+  cp -f ../config/fusioninventory.repo_v6 /etc/yum.repos.d/ez_fusioninventory.repo
+  yum -y install fusioninventory-agent fusioninventory-agent-task-inventory
+}
+
+setup_respo7()
+{
+  cp -f ../config/fusioninventory.repo_v7 /etc/yum.repos.d/ez_fusioninventory.repo
+  yum -y install fusioninventory-agent fusioninventory-agent-task-inventory
+}
+
+setup_respo8()
+{
+  subscription-manager repos --enable "codeready-builder-for-rhel-8-$(arch)-rpms"
+  dnf config-manager --set-enabled PowerTools
+  dnf install fusioninventory-agent fusioninventory-agent-task-inventory
+}
+
+setup_respo()
+{
+  if [[ "${OSVERSION}" -lt "6" ]] ;then
+    echo "${red}Error : Operating system is not support.${reset}"
+    echo "${red}OS : ${OSNAME} ${OSVERSION}${reset}"
+    exit;
+  elif [[ "${OSVERSION}" -eq "6" ]]; then
+    setup_respo6
+  elif [[ "${OSVERSION}" -eq "7" ]]; then
+    setup_respo7
+  elif [[ "${OSVERSION}" -eq "8" ]]; then
+    setup_respo8
+  else
+    echo "${red}Error : Operating system is not support.${reset}"
+    echo "${red}OS : ${OSNAME}${reset}"
+    echo "Please concact us."
+    exit;
+  fi
+}
+
+init_daemon(){
+  cat /dev/null > /var/log/ezyadmind.err
+  chmod 755 /usr/local/ezyadmin/agent/ezyadmin_agent
+  if [[ "${OSVERSION}" -eq "6" ]] ;then
+    # /agent/ezyadmind dest=/etc/init.d/ezyadmind
+    cp -f ../agent/ezyadmind /etc/init.d/ezyadmind
+    chkconfig --add ezyadmind
+    chkconfig ezyadmind on
+  elif [[ "${OSVERSION}" -eq "6" ]]; then
+    setup_respo6
+}
+
+# ========== main ==============
+Check_Support
+setup_respo
+if [[ "${INPUTKEY}" == "--all" ]] ;then
+  setup_linux
+  setup_cpanel
+  setup_da
+  setup_cloudLinux
+elif [[ "${INPUTKEY}"== "--linux" ]]; then
+  setup_linux
+elif [[ "${INPUTKEY}"== "--cpanel" ]]; then
+  setup_cpanel
+elif [[ "${INPUTKEY}"== "--da" ]]; then
+  setup_da
+elif [[ "${INPUTKEY}"== "--cloudLinux" ]]; then
+  setup_cloudLinux
+else
+  echo "${red}Error : Operating system is not support.${reset}"
+  echo "${red}OS : ${OSNAME}${reset}"
+  echo "Please concact us."
+  exit;
+fi
+
