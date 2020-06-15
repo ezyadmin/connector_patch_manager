@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# nohup /usr/local/ezyadmin/agent/ezyadmin_agent 0<&- &> /var/log/ezyadmind.log &
+nohup /usr/local/ezyadmin/agent/ezyadmin_agent > /dev/null 2>&1&
+#daemon "$(nohup /usr/local/ezyadmin/agent/ezyadmin_agent > /dev/null 2>&1&)"

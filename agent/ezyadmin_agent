@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+
+#Install nodejs 0.10
+#curl --silent --location https://rpm.nodesource.com/setup | bash -
+#yum install -y nodejs
+#npm install n -g
+#n 0.12.15
+#npm install -g yaml2json
+
+#cpanm YAML JSON
+
+
+#Running
+#nohup ./ezyadmin_agent 0<&- &> ezyadmin.log &
+#nohup /usr/local/ezyadmin/agent/ezyadmin_agent 0<&- &> /var/log/ezyadmind.log &
+
+#server url
+serverurl=$(awk '/^server/{print $3}' "/etc/fusioninventory/agent.cfg")
+cliserver=$(awk '/^cli-server/{print $3}' "/etc/fusioninventory/agent.cfg")
+
+ezyagentPath=`cd /usr/local/ezyadmin/agent`
+
+#path=$1
+path="/var/cache/yum/ /var/log/yum.log /usr/local/ezyadmin/agent/watch"
+#path="/var/log/yum.log"
+shift
+cmd=$*
+sha=0
+update_sha() {
+  sha=`ls -lR --time-style=full-iso $path | sha1sum`
+}
+update_sha
+previous_sha=$sha
+build() {
+  echo -en "building...\n"
+  echo -en "run EzyAdmin Inventory Agent\n"
+  
+  pwd=`pwd`
+  whoami=`whoami`
+  echo -en "working in dir ${pwd} with user ${whoami}\n"
+  
+  START_DATE=`date +%m/%d/%Y" "%T`
+  echo -en "Start at ${START_DATE}\n"
+  # echo -en "fusioninventory-inventory > inventory.xml && fusioninventory-injector --file inventory.xml --url ${serverurl}\n"
+  # output_agent=`fusioninventory-inventory > inventory.xml && fusioninventory-injector --file inventory.xml --url ${serverurl}`
+  
+  # echo -en "/usr/local/ezyadmin/agent/ezy_core.sh > ezy_core.json && curl -H \"Content-Type:application/json\" -X POST --data-binary @ezy_core.json ${cliserver}\n"
+  # #ezyagent=`/usr/local/ezyadmin/agent/ezy_core.sh > ezy_core.json 2>&1 </dev/null && curl -H "Content-Type:application/json" -X POST --data-binary @ezy_core.json ${cliserver}`
+  # /usr/local/ezyadmin/agent/ezy_core.sh > ezy_core.json 2>&1 </dev/null
+  # ezyagent=`curl -H "Content-Type:application/json" -X POST --data-binary @ezy_core.json ${cliserver}`
+  # #echo -n "${output_agent}" 
+  CPANELFILE=/usr/local/ezyadmin/agent/cpanel
+  if test -f "$CPANELFILE"; then
+    # echo "$CPANELFILE exist"
+    echo -en "### Inventory for cPanel ###\n"
+    /usr/local/ezyadmin/agent/ezy_inventory_for_cpanel > ezy_ci_cpanel.json 2>&1 </dev/null
+    ezyagent=`curl -H "Content-Type:application/json" -X POST --data-binary @ezy_ci_cpanel.json ${cliserver}`
+  fi
+  
+  CLOUDLINUXFILE=/usr/local/ezyadmin/agent/cloudlinux
+  if test -f "$CLOUDLINUXFILE"; then
+    echo -en "### Inventory for CloudLinux ###\n"
+    /usr/local/ezyadmin/agent/ezy_inventory_for_cloudlinux > ezy_ci_cloudlinux.json 2>&1 </dev/null
+    ezyagent=`curl -H "Content-Type:application/json" -X POST --data-binary @ezy_ci_cloudlinux.json ${cliserver}`
+  fi
+
+  DAFILE=/usr/local/ezyadmin/agent/da
+  if test -f "$DAFILE"; then
+    echo -en "### Inventory for DirectAdmin ###\n"
+    /usr/local/ezyadmin/agent/ezy_inventory_for_da > ezy_ci_da.json 2>&1 </dev/null
+    ezyagent=`curl -H "Content-Type:application/json" -X POST --data-binary @ezy_ci_da.json ${cliserver}`
+  fi
+
+  LINUXFILE=/usr/local/ezyadmin/agent/linux
+  if test -f "$LINUXFILE"; then
+    echo -en "### Inventory for Linux ###\n"
+    #echo -en "fusioninventory-inventory > inventory.xml && fusioninventory-injector --file inventory.xml --url ${serverurl}\n"
+    ezyfusion=`fusioninventory-inventory > inventory.xml && fusioninventory-injector --file inventory.xml --url ${serverurl}`
+
+    /usr/local/ezyadmin/agent/ezy_inventory_for_linux > ezy_ci_linux.json 2>&1 </dev/null
+    ezyagent=`curl -H "Content-Type:application/json" -X POST --data-binary @ezy_ci_linux.json ${cliserver}`
+  fi
+  
+  echo -en "Done at ${START_DATE}\n"
+  echo -en "\n--> resumed watching."
+}
+compare() {
+  update_sha
+  if [[ $sha != $previous_sha ]] ; then
+    echo -n "change detected,"
+    build
+    previous_sha=$sha    
+	#else
+    #echo -n .
+  fi
+}
+trap build SIGINT
+trap exit SIGQUIT
+
+echo -e  "==============config======================="
+echo -e  "serverurl = ${serverurl}"
+echo -e  "cliserver = ${cliserver}"
+echo -e  "==============config======================="
+
+echo -e  "--> Press Ctrl+C to force build, Ctrl+\\ to exit."
+echo -en "--> watching \"$path\"."
+while true; do
+	compare
+	#sleep 1
+	sleep 30s
+done
+
+#perl -MYAML -MJSON -E 'local $/; say to_json(Load(<>));' rpm.versions > rpm.versions.json
