@@ -1,9 +1,0 @@
-[Unit]
-Description=Ezyadmin Agent daemon
-
-[Service]
-Type=simple
-ExecStart=/usr/local/ezyadmin/agent/ezyadmin_deamon
-
-[Install]
-WantedBy=multi-user.target
