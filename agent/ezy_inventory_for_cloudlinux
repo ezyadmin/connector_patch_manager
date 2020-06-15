@@ -1,0 +1,167 @@
+#!/usr/bin/env bash
+
+# How to make yum show installed & latest packages (CentOS)
+
+# TODO
+# Notification incident
+
+# http://arstechnica.com/civis/viewtopic.php?t=1081335
+
+# get version
+# http://unix.stackexchange.com/questions/54987/how-to-know-centos-version
+
+#installl dependency
+
+#================== function =============================
+trim() {
+    # Determine if 'extglob' is currently on.
+    local extglobWasOff=1
+    shopt extglob >/dev/null && extglobWasOff=0 
+    (( extglobWasOff )) && shopt -s extglob # Turn 'extglob' on, if currently turned off.
+    # Trim leading and trailing whitespace
+    local var=$1
+    var=${var##+([[:space:]])}
+    var=${var%%+([[:space:]])}
+    (( extglobWasOff )) && shopt -u extglob # If 'extglob' was off before, turn it back off.
+    echo -n "$var"  # Output trimmed string.
+}
+#================== function =============================
+
+#================== variable ========================
+
+#OSNAME=`perl -e ' use Linux::Distribution qw(distribution_name distribution_version);  my $linux = Linux::Distribution->new;if(my $distro = $linux->distribution_name()) { my $version = $linux->distribution_version();print "$distro";}'`
+OSNAME=`perl get_os.pl`
+OSVERSION=""
+if [[ "${OSNAME}" == "centos" ]] ;then
+	OSNAME="CentOS"
+	OSVERSION=`rpm -q --queryformat '%{VERSION}' centos-release`
+elif [[ "${OSNAME}" == "redhat" ]]; then
+	OSNAME="RedHat"
+	OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release`
+elif [[ "${OSNAME}" == "cloudlinux" ]]; then
+	OSNAME="CloudLinux"
+	OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release`
+else
+	echo "Not support os : ${OSNAME}"
+	exit;
+fi
+
+if [[ "${OSVERSION}" == "package centos-release is not installed" ]]
+then
+	OSVERSION=`cat /etc/redhat-release | tr '\n' ' ' | sed -e 's/[^\ +0-9\.]/ /g' -e 's/^ *//g' -e 's/ *$//g' | awk -F \. {'print $1'}`
+fi
+
+OSARCH=`uname -m`
+ALLMONITORBY=""
+
+CPNAME="none"
+TIER=""
+
+#==============cpanel================
+FILE_Cpanel="/etc/cpupdate.conf"
+if [ -f $FILE_Cpanel ];
+then
+	CPNAME="cpanel"
+	TIER=`grep CPANEL /etc/cpupdate.conf`
+	TIER=${TIER##*\=}
+	
+	CPVERSION=`/usr/local/cpanel/cpanel -V`
+	
+fi
+
+
+#=================general data===============
+HOSTNAME=`hostname -f`
+echo "{"
+echo "\"agent\" : \"agent\","
+echo "\"patch_for\" : \"cloudlinux\","
+echo "\"connector_id\" : \"5d639f97a4b5faf008ba16e2\","
+echo "\"osarch\" : \"${OSARCH}\","
+echo "\"osname\" : \"${OSNAME}\","
+echo "\"hostname\" : \"${HOSTNAME}\","
+echo "\"osversion\" : \"${OSVERSION}\","
+echo "\"cpname\" : \"${CPNAME}\","
+echo "\"tier\" : \"${TIER}\","
+
+echo "\"ci\" : [ {} "
+
+
+#==============cloudlinux================
+#DETECTCLOUDLINUX=`uname -r | grep lve`
+DETECTCLOUDLINUX=`yum list installed -d3 | grep "cloudlinux-release"`
+#DETECTCLOUDLINUX=$(echo $DETECT_CLOUDLINUX)
+CLOUDLINUX_NAME=""
+CLOUDLINUX_MONITOR="cloudlinux"
+if [ "${DETECTCLOUDLINUX}x" != "x" ]
+then	
+	#cloudlinux core : cloudlinux-release
+	C_VERSION=`rpm -q --queryformat '%{VERSION}' cloudlinux-release`
+	CLOUNDLINUX_NAME="CloudLinux$C_VERSION"
+	CLOUNDLINUX_MONITOR="cloudlinux$C_VERSION"
+	CLOUNDLINUX_VERSION=`rpm -q --queryformat '%{RELEASE}' cloudlinux-release`
+  CLOUNDLINUX_MONITOR="cloudlinux$C_VERSION"
+  ALLMONITORBY="[\"${CLOUNDLINUX_MONITOR}\"]"
+	
+	echo ",{ \"name\" : \"${CLOUNDLINUX_NAME}\" ,  \"fullname\" : \"${CLOUNDLINUX_NAME}\" , \"version\" : \"${CLOUNDLINUX_VERSION}\", \"monitorby\" : \"cloudlinux$C_VERSION\", \"managedby\" : \"cloudlinux\", \"cpname\" : \"${CPNAME}\" ,\"cpversion\" : \"${TIER}\",  \"from\" : \"cloudlinux\" , \"osname\" : \"${OSNAME}\", \"osversion\" : \"${OSVERSION}\", \"osarch\" : \"${OSARCH}\"} "
+	
+	#List php
+  GETPHP=""
+  if [[ -x "$(command -v cl-selector)" ]];
+  then
+	  #cl-selector --list php | while read x y z
+    GETPHP="cl-selector --list php"
+	elif [[ -x "$(command -v selectorctl)" ]];
+  then
+	  #`selectorctl --list php | while read x y z`
+    GETPHP="selectorctl --list php"
+  fi
+
+  eval "$GETPHP" | while read x y z
+
+	do
+		x=$(echo $x)
+		y=$(echo $y)
+		PHP_NAME="php${x}"
+		PHP_VERSION="$y"
+		echo ",{ \"name\" : \"${PHP_NAME}\" ,  \"fullname\" : \"${PHP_NAME}\" , \"version\" : \"${PHP_VERSION}\", \"monitorby\" : \"cloudlinux${C_VERSION}\", \"managedby\" : \"cloudlinux\", \"cpname\" : \"${CPNAME}\" ,\"cpversion\" : \"${TIER}\",  \"from\" : \"cloudlinux\" , \"osname\" : \"${OSNAME}\", \"osversion\" : \"${OSVERSION}\", \"osarch\" : \"${OSARCH}\"} "
+	done
+
+	#apache
+	APACHE_VERSION=`httpd -v | tr '\n' ' ' | sed -e 's/[^\ +0-9\.]/ /g' -e 's/^ *//g' | awk -F \  {'print $1'}`
+	APACHE_DIS=${APACHE_VERSION%.*}
+	APACHE_NAME="apache$APACHE_DIS"
+	#echo "APACHE_VERSION = ${APACHE_VERSION}"
+	echo ",{ \"name\" : \"${APACHE_NAME}\" ,  \"fullname\" : \"${APACHE_NAME}\" , \"version\" : \"${APACHE_VERSION}\", \"monitorby\" : \"cloudlinux${C_VERSION}\", \"managedby\" : \"cloudlinux\", \"cpname\" : \"cpanel\" ,\"cpversion\" : \"${TIER}\",  \"from\" : \"cloudlinux\" , \"osname\" : \"${OSNAME}\", \"osversion\" : \"${OSVERSION}\", \"osarch\" : \"${OSARCH}\"} "
+	
+	#ftp server
+	#FTP_NAME=`more  /var/cpanel/cpanel.config | grep ftpserver | awk -F \=  {'print $2'}`
+	#if [[ $FTP_NAME == pure\-ftpd ]] ; then
+		#	FTP_VERSION=`pure-ftpd --help | head -1 | sed -e 's/[^\+0-9\.]/ /g' -e 's/^ *//g'`
+	#elif [[ $FTP_NAME == proftpd ]] ; then
+		#	FTP_VERSION=`proftpd -v | sed -e 's/[^\+0-9\.]/ /g' -e 's/^ *//g'`
+	#fi
+	
+	#echo ",{ \"name\" : \"${FTP_NAME}\" ,  \"fullname\" : \"${FTP_NAME}\" , \"latestversion\" : \"${FTP_VERSION}\", \"monitorby\" : \"cp\", \"cpname\" : \"cpanel\" ,\"cpversion\" : \"${TIER}\",  \"from\" : \"cpanel\" , \"osname\" : \"${OSNAME}\", \"osversion\" : \"${OSVERSION}\", \"osarch\" : \"${OSARCH}\"} "
+	
+	#mysql
+	DB_VERSION=`mysql -V | sed -e 's/[^\+0-9\.]/ /g' -e 's/^ *//g' | awk -F \  {'print $2'}`
+	DB_DIS=${DB_VERSION%.*}
+	DB_NAME="mysql$DB_DIS"
+	echo ",{ \"name\" : \"${DB_NAME}\" ,  \"fullname\" : \"${DB_NAME}\" , \"version\" : \"${DB_VERSION}\", \"monitorby\" : \"cloudlinux${C_VERSION}\", \"managedby\" : \"cloudlinux\", \"cpname\" : \"cpanel\" ,\"cpversion\" : \"${TIER}\",  \"from\" : \"cloudlinux\" , \"osname\" : \"${OSNAME}\", \"osversion\" : \"${OSVERSION}\", \"osarch\" : \"${OSARCH}\"} "
+
+	#SpamAssassin
+	#SPA_NAME="spamassassin"
+	#SPA_VERSION=`/usr/local/cpanel/3rdparty/bin/spamd -V | head -1 | sed -e 's/[^\+0-9\.]/ /g' -e 's/^ *//g'`
+	#echo ",{ \"name\" : \"${SPA_NAME}\" ,  \"fullname\" : \"${SPA_NAME}\" , \"latestversion\" : \"${SPA_VERSION}\", \"monitorby\" : \"cp\", \"cpname\" : \"cpanel\" ,\"cpversion\" : \"${TIER}\",  \"from\" : \"cpanel\" , \"osname\" : \"${OSNAME}\", \"osversion\" : \"${OSVERSION}\", \"osarch\" : \"${OSARCH}\"} "
+	
+fi
+
+
+#===================end==============================
+echo "],"
+
+#================================== get all managedby===================================
+echo "\"allmonitorby\" : ${ALLMONITORBY}"
+#================================== end get all managedby===============================
+echo "}"
+exit;
