@@ -11,6 +11,7 @@ green=`tput setaf 2`
 reset=`tput sgr0`
 
 #
+cd /usr/local/ezyadmin/connector_patch_manager-latest/script
 OSNAME=`perl ../agent/get_os.pl`
 OSVERSION=""
 if [[ "${OSNAME}" == "centos" ]] ;then
@@ -83,13 +84,13 @@ setup_cloudLinux()
 check_support()
 {
   echo "${green}------------- Check support -------------${reset}"
-  # TMP_YUM=`which yum 2> /dev/null` || TMP_YUM=$?
-  TMP_YUM=`yum -v 2> /dev/null` || TMP_YUM=$?
+  TMP_YUM=`which yum 2> /dev/null` || TMP_YUM=$?
+  # TMP_YUM=`yum -v 2> /dev/null` || TMP_YUM=$?
   if [ "${TMP_YUM}x" == "x" ] || [ "${TMP_YUM}" == "127" ]; then
     echo "${red}Error : Operating system is not support.${reset}"
     exit;
   fi
-  echo "${green}TMP_YUM ${TMP_YUM}="
+  echo "${green}TMP_YUM=${TMP_YUM}${reset}"
 
   OSNAME=`perl ../agent/get_os.pl`
   OSVERSION=""
@@ -170,6 +171,11 @@ init_daemon(){
     systemctl stop ezyadmin.service
     systemctl start ezyadmin.service
   else
+    echo "${red}Error : On init daemon.${reset}"
+    echo "${red}OS : ${OSNAME} ${OSVERSION} ${reset}"
+    echo "Please concact us."
+    exit;
+  fi
     
 }
 
@@ -179,7 +185,7 @@ call_ezapi_verify_installed()
   echo "installed is $2"
   api_server='https://api.netway.ezyadmin.com'
   hostname=`hostname -f`
-  url='${api_server}//verify/client/connector/${1}/hostname/{hostname}/installed/${2}'
+  url="${api_server}/verify/client/connector/${1}/hostname/${hostname}/installed/${2}"
   curl -H "Content-Type: application/json" -X PUT ${url}
 }
 
@@ -189,7 +195,7 @@ call_ezapi_verify_compatible()
   echo "installed is $2"
   api_server='https://api.netway.ezyadmin.com'
   hostname=`hostname -f`
-  url='${api_server}//verify/client/connector/${1}/hostname/{hostname}/compatible/${2}'
+  url="${api_server}/verify/client/connector/${1}/hostname/${hostname}/compatible/${2}"
   curl -H "Content-Type: application/json" -X PUT ${url}
 }
 
@@ -197,18 +203,23 @@ call_ezapi_verify_compatible()
 check_support
 
 # === install && enable connector
-if [[ "${INPUTKEY}" == "--all" ]] ;then
+if [[ "${INPUTKEY}" == "--all" ]]
+then
   setup_linux
   setup_cpanel
   setup_da
   setup_cloudLinux
-elif [[ "${INPUTKEY}"== "--linux" ]]; then
+elif [[ "${INPUTKEY}" == "--linux" ]]
+then
   setup_linux
-elif [[ "${INPUTKEY}"== "--cpanel" ]]; then
+elif [[ "${INPUTKEY}" == "--cpanel" ]]
+then
   setup_cpanel
-elif [[ "${INPUTKEY}"== "--da" ]]; then
+elif [[ "${INPUTKEY}" == "--da" ]]
+then
   setup_da
-elif [[ "${INPUTKEY}"== "--cloudLinux" ]]; then
+elif [[ "${INPUTKEY}" == "--cloudLinux" ]]
+then
   setup_cloudLinux
 else
   echo "${red}Error : Operating system is not support.${reset}"
