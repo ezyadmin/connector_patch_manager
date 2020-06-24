@@ -20,7 +20,7 @@ Check_Support()
     echo "${red}Error : Operating system is not support.${reset}"
     exit;
   fi
-  echo "${green}TMP_YUM ${TMP_YUM}="
+  # echo "${green}TMP_YUM ${TMP_YUM}="
 
   OSNAME=`perl ../agent/get_os.pl`
   OSVERSION=""
@@ -50,11 +50,11 @@ Install_Dependency()
   cpan YAML JSON Linux::Distribution
 }
 
-MAIN()
+Main_Install()
 {
   echo "${green}------------- Main install ----------${reset}"
-  mkdir -p /usr/local/ezyadmin/connector_patch_manager
-  cd /usr/local/ezyadmin/connector_patch_manager
+  mkdir -p /usr/local/ezyadmin/connector_patch_manager-latest
+  cd /usr/local/ezyadmin/connector_patch_manager-latest
   # ===== check support ===
   
   # ===== copy ============
@@ -82,10 +82,11 @@ MAIN()
     # ln -s /usr/local/ezyadmin/connector_patch_manager/script/ezinstall_patch_mgr /usr/local/bin/ezinstall_patch_mgr
   fi
   echo "$DATE_NOW" > /usr/local/ezyadmin/connector_patch_manager/install.log
+  echo "${green}------------- Done, Installed ----------${reset}"
 }
 
 # ===== main process =====
 Check_Support
 Install_Dependency
-Main
+Main_Install
 # ===== main process =====

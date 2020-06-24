@@ -22,11 +22,11 @@ Patch Manager for manual installation
   ```bash
     mkdir -p /usr/local/ezyadmin
     cd /usr/local/ezyadmin
-    wget https://github.com/ezyadmin/connector_patch_manager/archive/latest.tar.gz
+    wget -O connector_patch_manager.tar.gz https://github.com/ezyadmin/connector_patch_manager/archive/latest.tar.gz
     tar -xzf connector_patch_manager.tar.gz
-    cd connector_patch_manager
-    chmod 755 install/install.sh
-    ./install/install.sh
+    cd connector_patch_manager-latest/install
+    chmod 755 install.sh
+    ./install.sh
   ```
 
 #### For linux operating systems
