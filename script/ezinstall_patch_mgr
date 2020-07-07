@@ -43,18 +43,18 @@ setup_linux()
   setup_respo
   echo "$DATE_NOW" > /usr/local/ezyadmin/agent/linux
   call_ezapi_verify_installed 5e0307987f0fc331388ff450 true
+  call_ezapi_register 5e0307987f0fc331388ff450 true
 }
 setup_cpanel()
 {
   TMP_CPANEL=`/usr/local/cpanel/cpanel -V 2> /dev/null` || TMP_CPANEL=$?
   if [ "${TMP_CPANEL}x" == "x" ] || [ "${TMP_CPANEL}" == "127" ]; then
     echo "${red}Ignore : This server is not found cPanel/WHM.${reset}"
-    # call_ezapi_verify_installed 5c74c7ef3ae4f52ae9e1833c false
-    # exit;
   else
     echo "${green}Setup Patch Manager for cPanel/WHM ...${reset}"
     echo "$DATE_NOW" > /usr/local/ezyadmin/agent/cpanel
     call_ezapi_verify_installed 5c74c7ef3ae4f52ae9e1833c true
+    call_ezapi_register 5c74c7ef3ae4f52ae9e1833c true
   fi
 }
 setup_da()
@@ -62,11 +62,11 @@ setup_da()
   TMP_CPANEL=`/usr/local/cpanel/cpanel -V 2> /dev/null` || TMP_CPANEL=$?
   if [ "${TMP_CPANEL}x" == "x" ] || [ "${TMP_CPANEL}" == "127" ]; then
     echo "${red}Ignore : This server is not found Direct Admin.${reset}"
-    # exit;
   else
     echo "${green}Setup Patch Manager for Direct Admin ...${reset}"
     echo "$DATE_NOW" > /usr/local/ezyadmin/agent/da
     call_ezapi_verify_installed 5ca72512242546043ede359c true
+    call_ezapi_register 5ca72512242546043ede359c true
   fi
 }
 setup_cloudLinux()
@@ -76,6 +76,7 @@ setup_cloudLinux()
     echo "${green}Setup Patch Manager for CloudLinux ...${reset}"
     echo "$DATE_NOW" > /usr/local/ezyadmin/agent/cloudLinux
     call_ezapi_verify_installed 5d639f97a4b5faf008ba16e2 true
+    call_ezapi_register 5d639f97a4b5faf008ba16e2 true
   else
     echo "${red}Ignore : This server is not found CloudLinux.${reset}"
   fi
@@ -185,7 +186,17 @@ call_ezapi_verify_installed()
   echo "installed is $2"
   api_server='https://api.netway.ezyadmin.com'
   hostname=`hostname -f`
-  url="${api_server}/verify/client/connector/${1}/hostname/${hostname}/installed/${2}"
+  url="${api_server}/external/server/connector/${1}/hostname/${hostname}/installed/${2}"
+  curl -H "Content-Type: application/json" -X PUT ${url}
+}
+
+call_ezapi_register()
+{
+  echo "connector_id is $1"
+  echo "installed is $2"
+  api_server='https://api.netway.ezyadmin.com'
+  hostname=`hostname -f`
+  url="${api_server}/verify/client/connector/${1}/hostname/${hostname}/register/${2}"
   curl -H "Content-Type: application/json" -X PUT ${url}
 }
 
