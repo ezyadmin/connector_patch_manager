@@ -38,6 +38,9 @@ Check_Support()
     echo "${red}OS : ${OSNAME}${reset}"
     exit;
   fi
+  echo "${green}OS : ${OSNAME}${reset}"
+  echo "${green}Version : ${OSVERSION}${reset}"
+
 }
 
 Install_Dependency()
@@ -53,7 +56,11 @@ Install_Dependency()
 Main_Install()
 {
   echo "${green}------------- Main install ----------${reset}"
+  # install path
   mkdir -p /usr/local/ezyadmin/connector_patch_manager-latest
+  # default path
+  mkdir -p /usr/local/ezyadmin/connector_patch_manager
+  # cp -af ./../connector_patch_manager-latest /usr/local/ezyadmin/connector_patch_manager
   cd /usr/local/ezyadmin/connector_patch_manager-latest
   # ===== check support ===
   

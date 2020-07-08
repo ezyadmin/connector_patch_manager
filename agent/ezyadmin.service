@@ -1,9 +1,12 @@
 [Unit]
 Description=Ezyadmin Agent daemon
+After=network.target
 
 [Service]
-Type=simple
+Type=forking
+# User=root
 ExecStart=/usr/local/ezyadmin/agent/ezyadmin_deamon
+# Restart=always
 
 [Install]
 WantedBy=multi-user.target
