@@ -38,15 +38,18 @@ copy_to_ezydir()
 
 setup_linux()
 {
-  echo "Setup Patch Manager for linux ..."
+  echo "${green}---Setup connector patch manager for Linux.${reset}"
+  # echo "Setup Patch Manager for linux ..."
   # 2. install connector
   setup_respo
   echo "$DATE_NOW" > /usr/local/ezyadmin/agent/linux
   call_ezapi_verify_installed 5e0307987f0fc331388ff450 true
   call_ezapi_register 5e0307987f0fc331388ff450 true
+  echo "${green}...... done.${reset}"
 }
 setup_cpanel()
 {
+  echo "${green}---Setup connector patch manager for cPanel/WHM.${reset}"
   TMP_CPANEL=`/usr/local/cpanel/cpanel -V 2> /dev/null` || TMP_CPANEL=$?
   if [ "${TMP_CPANEL}x" == "x" ] || [ "${TMP_CPANEL}" == "127" ]; then
     echo "${red}Ignore : This server is not found cPanel/WHM.${reset}"
@@ -55,11 +58,13 @@ setup_cpanel()
     echo "$DATE_NOW" > /usr/local/ezyadmin/agent/cpanel
     call_ezapi_verify_installed 5c74c7ef3ae4f52ae9e1833c true
     call_ezapi_register 5c74c7ef3ae4f52ae9e1833c true
+   echo "${green}...... done.${reset}"
   fi
 }
 setup_da()
 {
-  TMP_CPANEL=`/usr/local/cpanel/cpanel -V 2> /dev/null` || TMP_CPANEL=$?
+  echo "${green}---Setup connector patch manager for DirectAdmin.${reset}"
+  TMP_CPANEL=`/usr/local/directadmin/directadmin v 2> /dev/null` || TMP_CPANEL=$?
   if [ "${TMP_CPANEL}x" == "x" ] || [ "${TMP_CPANEL}" == "127" ]; then
     echo "${red}Ignore : This server is not found Direct Admin.${reset}"
   else
@@ -67,16 +72,19 @@ setup_da()
     echo "$DATE_NOW" > /usr/local/ezyadmin/agent/da
     call_ezapi_verify_installed 5ca72512242546043ede359c true
     call_ezapi_register 5ca72512242546043ede359c true
+    echo "${green}...... done.${reset}"
   fi
 }
 setup_cloudLinux()
 {
+  echo "${green}---Setup connector patch manager for cloudLinux.${reset}"
   DETECTCLOUDLINUX=`yum list installed -d3 | grep "cloudlinux-release"`
   if [ "${DETECTCLOUDLINUX}x" != "x" ];	then
     echo "${green}Setup Patch Manager for CloudLinux ...${reset}"
     echo "$DATE_NOW" > /usr/local/ezyadmin/agent/cloudLinux
     call_ezapi_verify_installed 5d639f97a4b5faf008ba16e2 true
     call_ezapi_register 5d639f97a4b5faf008ba16e2 true
+    echo "${green}...... done.${reset}"
   else
     echo "${red}Ignore : This server is not found CloudLinux.${reset}"
   fi
@@ -89,9 +97,9 @@ check_support()
   # TMP_YUM=`yum -v 2> /dev/null` || TMP_YUM=$?
   if [ "${TMP_YUM}x" == "x" ] || [ "${TMP_YUM}" == "127" ]; then
     echo "${red}Error : Operating system is not support.${reset}"
-    exit;
+    # exit;
   fi
-  echo "${green}TMP_YUM=${TMP_YUM}${reset}"
+  # echo "${green}TMP_YUM=${TMP_YUM}${reset}"
 
   OSNAME=`perl ../agent/get_os.pl`
   OSVERSION=""
@@ -132,6 +140,7 @@ setup_respo8()
 
 setup_respo()
 {
+  echo "${green}----------- Setup repository -----------${reset}"
   if [[ "${OSVERSION}" -lt "6" ]] ;then
     echo "${red}Error : Operating system is not support.${reset}"
     echo "${red}OS : ${OSNAME} ${OSVERSION}${reset}"
@@ -151,6 +160,7 @@ setup_respo()
 }
 
 init_daemon(){
+  echo "${green}-------------- Init daemon --------------${reset}"
   cat /dev/null > /var/log/ezyadmind.err
   chmod 755 /usr/local/ezyadmin/agent/ezyadmin_agent
   if [[ "${OSVERSION}" -eq "6" ]] ;then
@@ -188,16 +198,18 @@ call_ezapi_verify_installed()
   hostname=`hostname -f`
   url="${api_server}/external/server/connector/${1}/hostname/${hostname}/installed/${2}"
   curl -H "Content-Type: application/json" -X PUT ${url}
+  echo "..."
 }
 
 call_ezapi_register()
 {
   echo "connector_id is $1"
-  echo "installed is $2"
+  echo "register is $2"
   api_server='https://api.netway.ezyadmin.com'
   hostname=`hostname -f`
-  url="${api_server}/verify/client/connector/${1}/hostname/${hostname}/register/${2}"
+  url="${api_server}/external/server/connector/${1}/hostname/${hostname}/register/${2}"
   curl -H "Content-Type: application/json" -X PUT ${url}
+  echo "..."
 }
 
 call_ezapi_verify_compatible()
@@ -233,9 +245,10 @@ elif [[ "${INPUTKEY}" == "--cloudLinux" ]]
 then
   setup_cloudLinux
 else
-  echo "${red}Error : Operating system is not support.${reset}"
-  echo "${red}OS : ${OSNAME}${reset}"
-  echo "Please concact us."
+  echo "${red}Error : Please check input arguments.${reset}"
+  echo "${red}Input : ${INPUTKEY}${reset}"
+  # echo "${red}OS : ${OSNAME}${reset}"
+  # echo "Please concact us."
   exit;
 fi
 
@@ -243,3 +256,5 @@ fi
 init_daemon
 # ===  configuration
 cp -f ../config/agent.cfg /etc/fusioninventory/agent.cfg
+
+echo "${green}------------- Done All -------------${reset}"
