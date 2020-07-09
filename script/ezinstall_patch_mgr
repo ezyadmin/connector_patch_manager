@@ -8,6 +8,10 @@ DATE_NOW=$(date '+%d/%m/%Y %H:%M:%S')
 
 red=`tput setaf 1`
 green=`tput setaf 2`
+yellow=`tput setaf 3`
+blue=`tput setaf 4`
+magenta=`tput setaf 5`
+cyan=`tput setaf 6`
 reset=`tput sgr0`
 
 #
@@ -38,56 +42,71 @@ copy_to_ezydir()
 
 setup_linux()
 {
-  echo "${green}---Setup connector patch manager for Linux.${reset}"
-  # echo "Setup Patch Manager for linux ..."
-  # 2. install connector
-  setup_respo
-  echo "$DATE_NOW" > /usr/local/ezyadmin/agent/linux
-  call_ezapi_verify_installed 5e0307987f0fc331388ff450 true
-  call_ezapi_register 5e0307987f0fc331388ff450 true
-  echo "${green}...... done.${reset}"
+  echo "${cyan}---Setup connector patch manager for Linux.${reset}"
+  ENABLE_LN="/usr/local/ezyadmin/agent/linux"
+  TMP_YUM=`which yum 2> /dev/null` || TMP_YUM=$?
+  if [ "${TMP_YUM}x" == "x" ] || [ "${TMP_YUM}" == "127" ]; then
+    echo "${yellow}Skip : This server is compatible Linux Connector.${reset}"
+    [ -e $ENABLE_LN ] && rm $ENABLE_LN
+  else
+    setup_respo
+    echo "$DATE_NOW" > $ENABLE_LN
+    # call_ezapi_verify_installed 5e0307987f0fc331388ff450 true
+    call_ezapi_register linux true
+    echo "${cyan}...... done.${reset}"
+  fi
+  echo "__________________________________________"
 }
 setup_cpanel()
 {
   echo "${green}---Setup connector patch manager for cPanel/WHM.${reset}"
+  ENABLE_CP="/usr/local/ezyadmin/agent/cpanel"
   TMP_CPANEL=`/usr/local/cpanel/cpanel -V 2> /dev/null` || TMP_CPANEL=$?
   if [ "${TMP_CPANEL}x" == "x" ] || [ "${TMP_CPANEL}" == "127" ]; then
-    echo "${red}Ignore : This server is not found cPanel/WHM.${reset}"
+    echo "${yellow}Skip : This server is not found cPanel/WHM.${reset}"
+    [ -e $ENABLE_CP ] && rm $ENABLE_CP
   else
     echo "${green}Setup Patch Manager for cPanel/WHM ...${reset}"
-    echo "$DATE_NOW" > /usr/local/ezyadmin/agent/cpanel
-    call_ezapi_verify_installed 5c74c7ef3ae4f52ae9e1833c true
-    call_ezapi_register 5c74c7ef3ae4f52ae9e1833c true
-   echo "${green}...... done.${reset}"
+    echo "$DATE_NOW" > $ENABLE_CP
+    # call_ezapi_verify_installed 5c74c7ef3ae4f52ae9e1833c true
+    call_ezapi_register cpanel true
+    echo "${green}...... done.${reset}"
   fi
+  echo "__________________________________________"
 }
 setup_da()
 {
+  ENABLE_DA="/usr/local/ezyadmin/agent/da"
   echo "${green}---Setup connector patch manager for DirectAdmin.${reset}"
-  TMP_CPANEL=`/usr/local/directadmin/directadmin v 2> /dev/null` || TMP_CPANEL=$?
-  if [ "${TMP_CPANEL}x" == "x" ] || [ "${TMP_CPANEL}" == "127" ]; then
-    echo "${red}Ignore : This server is not found Direct Admin.${reset}"
+  TMP_DA=`/usr/local/directadmin/directadmin v 2> /dev/null` || TMP_DA=$?
+  if [ "${TMP_DA}x" == "x" ] || [ "${TMP_DA}" == "127" ]; then
+    echo "${yellow}Skip : This server is not found Direct Admin.${reset}"
+    [ -e $ENABLE_DA ] && rm $ENABLE_DA
   else
     echo "${green}Setup Patch Manager for Direct Admin ...${reset}"
     echo "$DATE_NOW" > /usr/local/ezyadmin/agent/da
-    call_ezapi_verify_installed 5ca72512242546043ede359c true
-    call_ezapi_register 5ca72512242546043ede359c true
+    # call_ezapi_verify_installed 5ca72512242546043ede359c true
+    call_ezapi_register da true
     echo "${green}...... done.${reset}"
   fi
+  echo "__________________________________________"
 }
 setup_cloudLinux()
 {
+  ENABLE_CL="/usr/local/ezyadmin/agent/cloudlinux"
   echo "${green}---Setup connector patch manager for cloudLinux.${reset}"
   DETECTCLOUDLINUX=`yum list installed -d3 | grep "cloudlinux-release"`
   if [ "${DETECTCLOUDLINUX}x" != "x" ];	then
     echo "${green}Setup Patch Manager for CloudLinux ...${reset}"
-    echo "$DATE_NOW" > /usr/local/ezyadmin/agent/cloudLinux
-    call_ezapi_verify_installed 5d639f97a4b5faf008ba16e2 true
-    call_ezapi_register 5d639f97a4b5faf008ba16e2 true
+    echo "$DATE_NOW" > $ENABLE_CL
+    # call_ezapi_verify_installed 5d639f97a4b5faf008ba16e2 true
+    call_ezapi_register cloudLinux true
     echo "${green}...... done.${reset}"
   else
-    echo "${red}Ignore : This server is not found CloudLinux.${reset}"
+    echo "${red}SKIP : This server is not found CloudLinux.${reset}"
+    [ -e $ENABLE_DA ] && rm $ENABLE_DA
   fi
+  echo "__________________________________________"
 }
 
 check_support()
@@ -97,7 +116,7 @@ check_support()
   # TMP_YUM=`yum -v 2> /dev/null` || TMP_YUM=$?
   if [ "${TMP_YUM}x" == "x" ] || [ "${TMP_YUM}" == "127" ]; then
     echo "${red}Error : Operating system is not support.${reset}"
-    # exit;
+    exit;
   fi
   # echo "${green}TMP_YUM=${TMP_YUM}${reset}"
 
@@ -117,6 +136,7 @@ check_support()
     echo "${red}OS : ${OSNAME}${reset}"
     exit;
   fi
+  echo "__________________________________________"
 }
 
 setup_respo6()
@@ -197,8 +217,25 @@ call_ezapi_verify_installed()
   api_server='https://api.netway.ezyadmin.com'
   hostname=`hostname -f`
   url="${api_server}/external/server/connector/${1}/hostname/${hostname}/installed/${2}"
-  curl -H "Content-Type: application/json" -X PUT ${url}
-  echo "..."
+  # curl -H "Content-Type: application/json" -X PUT ${url}
+  HTTP_RESPONSE=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" -H 'Content-Type: application/json' -X PUT ${url})
+  
+  HTTP_STATUS=$(echo $HTTP_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+  HTTP_BODY=$(echo $HTTP_RESPONSE | sed -e 's/HTTPSTATUS\:.*//g')
+  # echo "=========="
+  # echo $request_cmd
+  # echo "=========="
+  # echo $HTTP_STATUS
+  # echo "=========="
+  # echo $HTTP_BODY
+  # echo "=========="
+  if [ "$HTTP_STATUS" != "200" ]; then
+    # echo "${red}HTTP status : ${HTTP_STATUS} ${reset}"
+    echo "${red}Error :[${HTTP_STATUS}] ${HTTP_BODY} ${reset}"
+  else
+      echo "... success."  
+  fi
+  # echo "__________________________________________"  
 }
 
 call_ezapi_register()
@@ -208,8 +245,17 @@ call_ezapi_register()
   api_server='https://api.netway.ezyadmin.com'
   hostname=`hostname -f`
   url="${api_server}/external/server/connector/${1}/hostname/${hostname}/register/${2}"
-  curl -H "Content-Type: application/json" -X PUT ${url}
-  echo "..."
+  # curl -H "Content-Type: application/json" -X PUT ${url}
+  HTTP_RESPONSE=$(curl --silent --write-out "HTTPSTATUS:%{http_code}" -H 'Content-Type: application/json' -X PUT ${url})
+  
+  HTTP_STATUS=$(echo $HTTP_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+  HTTP_BODY=$(echo $HTTP_RESPONSE | sed -e 's/HTTPSTATUS\:.*//g')
+  if [ "$HTTP_STATUS" != "200" ]; then
+    echo "${red}Error while registration :[${HTTP_STATUS}] ${HTTP_BODY} ${reset}"
+  else
+      echo "... success."  
+  fi
+  # echo "__________________________________________"
 }
 
 call_ezapi_verify_compatible()
