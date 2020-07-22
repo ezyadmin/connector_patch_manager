@@ -86,7 +86,7 @@ setup_da()
     echo "${green}Setup Patch Manager for Direct Admin ...${reset}"
     echo "$DATE_NOW" > /usr/local/ezyadmin/agent/da
     # call_ezapi_verify_installed 5ca72512242546043ede359c true
-    call_ezapi_register da true
+    call_ezapi_register directadmin true
     echo "${green}...... done.${reset}"
   fi
   echo "__________________________________________"
@@ -229,11 +229,11 @@ call_ezapi_verify_installed()
   # echo "=========="
   # echo $HTTP_BODY
   # echo "=========="
-  if [ "$HTTP_STATUS" != "200" ]; then
+  if "$HTTP_STATUS" == "200" ] || [ "$HTTP_STATUS" == "201" ; then
     # echo "${red}HTTP status : ${HTTP_STATUS} ${reset}"
-    echo "${red}Error :[${HTTP_STATUS}] ${HTTP_BODY} ${reset}"
+    echo "... success."  
   else
-      echo "... success."  
+    echo "${red}Error :[${HTTP_STATUS}] ${HTTP_BODY} ${reset}"
   fi
   # echo "__________________________________________"  
 }
@@ -250,10 +250,10 @@ call_ezapi_register()
   
   HTTP_STATUS=$(echo $HTTP_RESPONSE | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
   HTTP_BODY=$(echo $HTTP_RESPONSE | sed -e 's/HTTPSTATUS\:.*//g')
-  if [ "$HTTP_STATUS" != "200" ]; then
-    echo "${red}Error while registration :[${HTTP_STATUS}] ${HTTP_BODY} ${reset}"
+  if [ "$HTTP_STATUS" == "200" ] || [ "$HTTP_STATUS" == "201" ] ; then
+    echo "... success." 
   else
-      echo "... success."  
+    echo "${red}Error while registration :[${HTTP_STATUS}] ${HTTP_BODY} ${reset}"
   fi
   # echo "__________________________________________"
 }
