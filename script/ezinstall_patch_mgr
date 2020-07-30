@@ -302,5 +302,7 @@ fi
 init_daemon
 # ===  configuration
 cp -f ../config/agent.cfg /etc/fusioninventory/agent.cfg
+# === start agent onec 
+echo $(date) > /usr/local/ezyadmin/agent/watch
 
 echo "${green}------------- Done All -------------${reset}"
