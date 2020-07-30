@@ -50,7 +50,7 @@ Patch Manager for manual installation
 #### For CloudLinux
 
   ```bash
-    ezinstall_patch_mgr --cloudLinux
+    ezinstall_patch_mgr --cloudlinux
   ```
 
 ## Configuration

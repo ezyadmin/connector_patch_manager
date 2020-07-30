@@ -287,7 +287,7 @@ then
 elif [[ "${INPUTKEY}" == "--da" ]]
 then
   setup_da
-elif [[ "${INPUTKEY}" == "--cloudLinux" ]]
+elif [[ "${INPUTKEY}" == "--cloudlinux" ]]
 then
   setup_cloudLinux
 else
