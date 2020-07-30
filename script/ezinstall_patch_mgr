@@ -100,7 +100,7 @@ setup_cloudLinux()
     echo "${green}Setup Patch Manager for CloudLinux ...${reset}"
     echo "$DATE_NOW" > $ENABLE_CL
     # call_ezapi_verify_installed 5d639f97a4b5faf008ba16e2 true
-    call_ezapi_register cloudLinux true
+    call_ezapi_register cloudlinux true
     echo "${green}...... done.${reset}"
   else
     echo "${red}SKIP : This server is not found CloudLinux.${reset}"
