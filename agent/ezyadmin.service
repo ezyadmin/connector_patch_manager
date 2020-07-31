@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=forking
 # User=root
-ExecStart=/usr/local/ezyadmin/agent/ezyadmin_deamon
+ExecStart=/usr/local/ezyadmin/agent/ezyadmin_deamonsd
 # Restart=always
 
 [Install]

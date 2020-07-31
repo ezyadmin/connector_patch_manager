@@ -39,7 +39,7 @@ trim() {
 #================== variable ========================
 
 #OSNAME=`perl -e ' use Linux::Distribution qw(distribution_name distribution_version);  my $linux = Linux::Distribution->new;if(my $distro = $linux->distribution_name()) { my $version = $linux->distribution_version();print "$distro";}'`
-OSNAME=`perl get_os.pl`
+OSNAME=`perl /usr/local/ezyadmin/agent/get_os.pl`
 OSVERSION=""
 if [[ "${OSNAME}" == "centos" ]] ;then
 	OSNAME="CentOS"
