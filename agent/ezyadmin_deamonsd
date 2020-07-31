@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+nohup /usr/local/ezyadmin/agent/ezyadmin_agentsd > /dev/null 2>&1&
