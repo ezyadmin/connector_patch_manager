@@ -143,7 +143,7 @@ if [ "${TMP_PEAR}x" != "x" ] ; then
 	#pear list-all | tr "\n" "#" | sed -e 's/# / /g' | tr "#" "\n" | while read i j 
 	#pear list | while read i j k
 	#eval "$TMP_PEAR list" | while read i j k
-  eval ${TMP_PEAR} list | while read i j k
+  eval ${TMP_PEAR} list 2> /dev/null | while read i j k
 	do
 		i=$(echo $i)
 		j=$(echo $j)
@@ -161,7 +161,7 @@ TMP_CPAN=`which cpan 2> /dev/null` || TMP_CPAN=$?
 if [ "${TMP_CPAN}x" != "x" ] ; then
 	ALLMONITORBY="${ALLMONITORBY},\"thirdparty_cpan\""
 	#TODO Fix cpan run command is frist
-	cpan -O | while read i j k
+	cpan -O 2> /dev/null | while read i j k
 	do
 		i=$(echo $i)
 		j=$(echo $j)
