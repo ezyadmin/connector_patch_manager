@@ -205,7 +205,7 @@ then
 	#echo ",{\"name\":\"${SW_NAME}\",\"fullname\":\"${SW_NAME}\",\"version\":\"${SW_VERSION}\",\"comments\":\"${SW_COMMENT}\",\"from\":\"kernel\",\"osname\":\"${OSNAME}\",\"osversion\":\"${OSVERSION}\",\"osarch\":\"${OSARCH}\",\"monitorby\":\"kernel\"}"
 	
 	#KEFFECTIVE_VERSION=`/usr/bin/kcarectl --uname`
-	KEFFECTIVE_VERSION=`kcarectl --uname`
+	KEFFECTIVE_VERSION=`kcarectl --uname 2> /dev/null`
 fi
 
 #Ksplice ===========================
@@ -215,7 +215,7 @@ if [ "${KTMM}x" != "KTMM" ] && [ "${KTMM}" == "ksplice-uptrack-release" ]
 then
 	KMANAGEDBY="kernel"
   KFROM="kernel"
-	KEFFECTIVE_VERSION=`uptrack-uname -r`
+	KEFFECTIVE_VERSION=`uptrack-uname -r 2> /dev/null`
 fi	
 
 KMONITORBY="${OSNAME}${OSVERSION}"
