@@ -38,6 +38,9 @@ if [[ "${OSNAME}" == "centos" ]] ;then
 elif [[ "${OSNAME}" == "redhat" ]]; then
 	OSNAME="RedHat"
 	OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release`
+elif [[ "${OSNAME}" == "cloudlinux" ]]; then
+	OSNAME="CloudLinux"
+	OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release`
 else
 	echo "Not support os : ${OSNAME}"
 	exit;
