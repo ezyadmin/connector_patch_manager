@@ -141,19 +141,26 @@ check_support()
 
 setup_respo6()
 {
-  cp -f ../config/fusioninventory.repo_v6 /etc/yum.repos.d/ez_fusioninventory.repo
+  yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+  # cp -f ../config/fusioninventory.repo_v6 /etc/yum.repos.d/ez_fusioninventory.repo
+  yum update -y
   yum -y install fusioninventory-agent fusioninventory-agent-task-inventory
 }
 
 setup_respo7()
 {
-  cp -f ../config/fusioninventory.repo_v7 /etc/yum.repos.d/ez_fusioninventory.repo
+  yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  # cp -f ../config/fusioninventory.repo_v7 /etc/yum.repos.d/ez_fusioninventory.repo
+  yum update -y
   yum -y install fusioninventory-agent fusioninventory-agent-task-inventory
 }
 
 setup_respo8()
 {
-  subscription-manager repos --enable "codeready-builder-for-rhel-8-$(arch)-rpms"
+
+  # subscription-manager repos --enable "codeready-builder-for-rhel-8-$(arch)-rpms"
+  yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+  yum update -y
   dnf config-manager --set-enabled PowerTools
   dnf install fusioninventory-agent fusioninventory-agent-task-inventory
 }
@@ -161,6 +168,7 @@ setup_respo8()
 setup_respo()
 {
   echo "${green}----------- Setup repository -----------${reset}"
+  echo
   if [[ "${OSVERSION}" -lt "6" ]] ;then
     echo "${red}Error : Operating system is not support.${reset}"
     echo "${red}OS : ${OSNAME} ${OSVERSION}${reset}"
