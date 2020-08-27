@@ -164,7 +164,7 @@ setup_respo8()
   yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
   yum update -y
   dnf config-manager --set-enabled PowerTools
-  dnf install fusioninventory-agent fusioninventory-agent-task-inventory
+  dnf install -y fusioninventory-agent fusioninventory-agent-task-inventory
 }
 
 setup_respo()
