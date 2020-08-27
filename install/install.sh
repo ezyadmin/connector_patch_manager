@@ -50,6 +50,7 @@ Install_Dependency()
   cd /usr/local/ezyadmin/tmp/
   yum -y install perl perl-devel perl-CPAN
   curl -L https://cpanmin.us | perl - App::cpanminus
+  PERL_MM_USE_DEFAULT=1 perl -MCPAN -e 'my $c = "CPAN::HandleConfig"; $c->load(doit => 1, autoconfig => 1); $c->edit(prerequisites_policy => "follow"); $c->edit(build_requires_install_policy => "yes"); $c->commit'
   cpan YAML JSON Linux::Distribution
 }
 
