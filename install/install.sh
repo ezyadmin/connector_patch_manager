@@ -26,13 +26,13 @@ Check_Support()
   OSVERSION=""
   if [[ "${OSNAME}" == "centos" ]] ;then
     OSNAME="CentOS"
-    OSVERSION=`rpm -q --queryformat '%{VERSION}' centos-release`
+    OSVERSION=`rpm -q --queryformat '%{VERSION}' centos-release | awk -F. '{print $1}' | tr -d "\n"`
   elif [[ "${OSNAME}" == "redhat" ]]; then
     OSNAME="RedHat"
-    OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release`
+    OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release | awk -F. '{print $1}' | tr -d "\n"`
   elif [[ "${OSNAME}" == "cloudlinux" ]]; then
     OSNAME="CloudLinux"
-    OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release`
+    OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release | awk -F. '{print $1}' | tr -d "\n"`
   else
     echo "${red}Error : Operating system is not support.${reset}"
     echo "${red}OS : ${OSNAME}${reset}"
