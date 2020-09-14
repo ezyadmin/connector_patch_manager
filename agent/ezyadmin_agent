@@ -21,7 +21,8 @@ cliserver=$(awk '/^cli-server/{print $3}' "/etc/fusioninventory/agent.cfg")
 ezyagentPath=`cd /usr/local/ezyadmin/agent`
 
 #path=$1
-path="/var/cache/yum/ /var/log/yum.log /usr/local/ezyadmin/agent/watch"
+# path="/var/cache/yum/ /var/log/yum.log /usr/local/ezyadmin/agent/watch"
+path="/var/log/yum.log /usr/local/ezyadmin/agent/watch"
 #path="/var/log/yum.log"
 shift
 cmd=$*
