@@ -52,9 +52,9 @@ build() {
   # #echo -n "${output_agent}" 
   
   ### -- run monitoring latest version ###
-  MOFILE=/usr/local/ezyadmin/civersion_service/ezycron_monitor
+  MOFILE=/usr/local/ezyadmin/civersion_service/monitor
   if test -f "$MOFILE"; then
-    /usr/local/ezyadmin/civersion_service/ezycron_monitor > /dev/null 2>&1
+    /usr/local/ezyadmin/civersion_service/monitor > /dev/null 2>&1
     sleep 10s
   fi
 
