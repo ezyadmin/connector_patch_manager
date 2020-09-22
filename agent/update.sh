@@ -7,3 +7,5 @@ tar -xzf connector_patch_manager.tar.gz
 cd connector_patch_manager-latest/install
 chmod 755 install.sh
 ./install.sh
+cd /usr/local/ezyadmin/agent
+chmod 755 update.sh
