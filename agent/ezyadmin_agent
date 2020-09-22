@@ -50,6 +50,14 @@ build() {
   # /usr/local/ezyadmin/agent/ezy_core.sh > ezy_core.json 2>&1 </dev/null
   # ezyagent=`curl -H "Content-Type:application/json" -X POST --data-binary @ezy_core.json ${cliserver}`
   # #echo -n "${output_agent}" 
+  
+  ### -- run monitoring latest version ###
+  MOFILE=/usr/local/ezyadmin/civersion_service/ezycron_monitor
+  if test -f "$MOFILE"; then
+    /usr/local/ezyadmin/civersion_service/ezycron_monitor > /dev/null 2>&1
+    sleep 10s
+  fi
+
   CPANELFILE=/usr/local/ezyadmin/agent/cpanel
   if test -f "$CPANELFILE"; then
     # echo "$CPANELFILE exist"
