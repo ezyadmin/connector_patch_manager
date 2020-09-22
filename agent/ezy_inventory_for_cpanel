@@ -112,7 +112,7 @@ then
 			CK_FILE="/etc/scl/prefixes/${eachPhp}"
 			if [ "${eachPhp}x" != "x" ] && [[ $eachPhp != DEFAULT ]]
 			then
-				PHP_VERSION=`scl enable $eachPhp 'php -v' | tr '\n' ' ' | sed -e 's/[^\ +0-9\.]/ /g' -e 's/^ *//g' | awk -F \  {'print $1'}`
+				PHP_VERSION=`scl enable $eachPhp 'php -v' 2>/dev/null | tr '\n' ' ' | sed -e 's/[^\ +0-9\.]/ /g' -e 's/^ *//g' | awk -F \  {'print $1'}`
 				#echo "${eachPhp}=${PHP_VERSION}"
 				PHP_DIS=${PHP_VERSION%.*}
 				PHP_NAME="php$PHP_DIS"
