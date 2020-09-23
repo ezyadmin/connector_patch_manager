@@ -63,7 +63,8 @@ build() {
     # echo "$CPANELFILE exist"
     echo -en "### Inventory for cPanel ###\n"
     /usr/local/ezyadmin/agent/ezy_inventory_for_cpanel > /usr/local/ezyadmin/agent/ezy_ci_cpanel.json 2>&1 </dev/null
-    ezyagent=`curl -H "Content-Type:application/json" -X POST --data-binary @/usr/local/ezyadmin/agent/ezy_ci_cpanel.json ${cliserver}`
+    ## ezyagent=`curl -H "Content-Type:application/json" -X POST --data-binary @/usr/local/ezyadmin/agent/ezy_ci_cpanel.json ${cliserver}`
+    curl -H "Content-Type:application/json" -X POST --data-binary @/usr/local/ezyadmin/agent/ezy_ci_cpanel.json $cliserver
     ## ---
     # ExecStart=/usr/bin/sh "/usr/local/ezyadmin/agent/ezy_inventory_for_cpanel > /usr/local/ezyadmin/agent/ezy_ci_cpanel.json 2>&1 </dev/null"
     # ExecStart=/usr/bin/sh "curl -H 'Content-Type:application/json' -X POST --data-binary @/usr/local/ezyadmin/agent/ezy_ci_cpanel.json ${cliserver}"
@@ -74,7 +75,8 @@ build() {
   if test -f "$CLOUDLINUXFILE"; then
     echo -en "### Inventory for CloudLinux ###\n"
     /usr/local/ezyadmin/agent/ezy_inventory_for_cloudlinux > /usr/local/ezyadmin/agent/ezy_ci_cloudlinux.json 2>&1 </dev/null
-    ezyagent=`curl -H "Content-Type:application/json" -X POST --data-binary @/usr/local/ezyadmin/agent/ezy_ci_cloudlinux.json ${cliserver}`
+    ## ezyagent=`curl -H "Content-Type:application/json" -X POST --data-binary @/usr/local/ezyadmin/agent/ezy_ci_cloudlinux.json ${cliserver}`
+    curl -H "Content-Type:application/json" -X POST --data-binary @/usr/local/ezyadmin/agent/ezy_ci_cloudlinux.json $cliserver
     ## --- 
     # ExecStart=/usr/bin/sh "/usr/local/ezyadmin/agent/ezy_inventory_for_cloudlinux > /usr/local/ezyadmin/agent/ezy_ci_cloudlinux.json 2>&1 </dev/null"
     # ExecStart=/usr/bin/sh "curl -H 'Content-Type:application/json' -X POST --data-binary @/usr/local/ezyadmin/agent/ezy_ci_cloudlinux.json ${cliserver}"
@@ -85,7 +87,8 @@ build() {
   if test -f "$DAFILE"; then
     echo -en "### Inventory for DirectAdmin ###\n"
     /usr/local/ezyadmin/agent/ezy_inventory_for_da > /usr/local/ezyadmin/agent/ezy_ci_da.json 2>&1 </dev/null
-    ezyagent=`curl -H "Content-Type:application/json" -X POST --data-binary @/usr/local/ezyadmin/agent/ezy_ci_da.json ${cliserver}`
+    ## ezyagent=`curl -H "Content-Type:application/json" -X POST --data-binary @/usr/local/ezyadmin/agent/ezy_ci_da.json ${cliserver}`
+    curl -H "Content-Type:application/json" -X POST --data-binary @/usr/local/ezyadmin/agent/ezy_ci_da.json $cliserver
     ## --- 
     # ExecStart=/usr/bin/sh "/usr/local/ezyadmin/agent/ezy_inventory_for_da > /usr/local/ezyadmin/agent/ezy_ci_da.json 2>&1 </dev/null"
     # ExecStart=/usr/bin/sh "curl -H 'Content-Type:application/json' -X POST --data-binary @/usr/local/ezyadmin/agent/ezy_ci_da.json ${cliserver}"
@@ -95,10 +98,12 @@ build() {
   LINUXFILE=/usr/local/ezyadmin/agent/linux
   if test -f "$LINUXFILE"; then
     echo -en "### Inventory for Linux ###\n"
-    echo -en "fusioninventory-inventory > inventory.xml && fusioninventory-injector --file inventory.xml --url ${serverurl}\n"
+    #echo -en "fusioninventory-inventory > inventory.xml && fusioninventory-injector --file inventory.xml --url ${serverurl}\n"
     ezyfusion=`fusioninventory-inventory > /usr/local/ezyadmin/agent/inventory.xml && fusioninventory-injector --file /usr/local/ezyadmin/agent/inventory.xml --url ${serverurl}`
     /usr/local/ezyadmin/agent/ezy_inventory_for_linux > /usr/local/ezyadmin/agent/ezy_ci_linux.json 2>&1 </dev/null
-    ezyagent=`curl -H "Content-Type:application/json" -X POST --data-binary @/usr/local/ezyadmin/agent/ezy_ci_linux.json ${cliserver}`
+    ## ezyagent=`curl -H "Content-Type:application/json" -X POST --data-binary @/usr/local/ezyadmin/agent/ezy_ci_linux.json ${cliserver}`
+    curl -H "Content-Type:application/json" -X POST --data-binary @/usr/local/ezyadmin/agent/ezy_ci_linux.json $cliserver
+
     ## --- 
     # ExecStart=/usr/bin/sh "fusioninventory-inventory 2> /dev/null > /usr/local/ezyadmin/agent/inventory.xml && fusioninventory-injector --file /usr/local/ezyadmin/agent/inventory.xml --url ${serverurl}"
     # ExecStart=/usr/bin/sh "/usr/local/ezyadmin/agent/ezy_inventory_for_linux > /usr/local/ezyadmin/agent/ezy_ci_linux.json 2>&1 </dev/null"

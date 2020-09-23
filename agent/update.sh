@@ -9,3 +9,4 @@ chmod 755 install.sh
 ./install.sh
 cd /usr/local/ezyadmin/agent
 chmod 755 update.sh
+echo $(date) >> /usr/local/ezyadmin/agent/watch
