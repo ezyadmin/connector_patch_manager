@@ -147,9 +147,11 @@ then
 	elif [[ $FTP_NAME == proftpd ]] ; then
 		FTP_VERSION=`proftpd -v | sed -e 's/[^\+0-9\.]/ /g' -e 's/^ *//g'`
 	fi
-	
-	echo ",{ \"name\" : \"${FTP_NAME}\" ,  \"fullname\" : \"${FTP_NAME}\" , \"version\" : \"${FTP_VERSION}\", \"monitorby\" : \"${CPMonitorBy}\", \"managedby\" : \"${CPManagedBy}\", \"cpname\" : \"cpanel\" ,\"cpversion\" : \"${TIER}\",  \"from\" : \"cpanel\" , \"osname\" : \"${OSNAME}\", \"osversion\" : \"${OSVERSION}\", \"osarch\" : \"${OSARCH}\"} "
-	
+	if [ "${FTP_NAME}x" != "x" ] && [[ $FTP_NAME != "disabled" ]]
+		then
+	  echo ",{ \"name\" : \"${FTP_NAME}\" ,  \"fullname\" : \"${FTP_NAME}\" , \"version\" : \"${FTP_VERSION}\", \"monitorby\" : \"${CPMonitorBy}\", \"managedby\" : \"${CPManagedBy}\", \"cpname\" : \"cpanel\" ,\"cpversion\" : \"${TIER}\",  \"from\" : \"cpanel\" , \"osname\" : \"${OSNAME}\", \"osversion\" : \"${OSVERSION}\", \"osarch\" : \"${OSARCH}\"} "
+	fi
+
 	#mysql
 	DB_NAME="MySQL"
 	DB_VERSION=`mysql -V | sed -e 's/[^\+0-9\.]/ /g' -e 's/^ *//g' | awk -F \  {'print $2'}`

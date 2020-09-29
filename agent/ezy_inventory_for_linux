@@ -197,15 +197,20 @@ done
 Path_KernelCareCtl="/usr/bin/kcarectl"
 if [ -f $Path_KernelCareCtl ];
 then
-	KMANAGEDBY="kernel"
-  KFROM="kernel"
+	
 	#SW_NAME="kernelcare"a
 	#SW_VERSION=`/usr/bin/kcarectl --version`
 	#SW_COMMENT=`rpm -q --queryformat '%{SUMMARY}' kernelcare`
 	#echo ",{\"name\":\"${SW_NAME}\",\"fullname\":\"${SW_NAME}\",\"version\":\"${SW_VERSION}\",\"comments\":\"${SW_COMMENT}\",\"from\":\"kernel\",\"osname\":\"${OSNAME}\",\"osversion\":\"${OSVERSION}\",\"osarch\":\"${OSARCH}\",\"monitorby\":\"kernel\"}"
 	
 	#KEFFECTIVE_VERSION=`/usr/bin/kcarectl --uname`
-	KEFFECTIVE_VERSION=`kcarectl --uname 2> /dev/null`
+  KCARE_V=`kcarectl --uname 2> /dev/null`
+	# KEFFECTIVE_VERSION=`kcarectl --uname 2> /dev/null`
+  if [ "${KCARE_V}x" != "x" ];then
+    KMANAGEDBY="kernel"
+    KFROM="kernel"
+    KEFFECTIVE_VERSION="$KCARE_V"
+  fi 
 fi
 
 #Ksplice ===========================
@@ -213,9 +218,15 @@ KTMM=`rpm -q ksplice-uptrack-release --qf "%{NAME}"`
 KTMM=$(echo $KTMM)
 if [ "${KTMM}x" != "KTMM" ] && [ "${KTMM}" == "ksplice-uptrack-release" ]
 then
-	KMANAGEDBY="kernel"
-  KFROM="kernel"
-	KEFFECTIVE_VERSION=`uptrack-uname -r 2> /dev/null`
+	# KMANAGEDBY="kernel"
+  # KFROM="kernel"
+	# KEFFECTIVE_VERSION=`uptrack-uname -r 2> /dev/null`
+  KSP_V=`uptrack-uname -r 2> /dev/null`
+  if [ "${KSP_V}x" != "x" ];then
+    KMANAGEDBY="kernel"
+    KFROM="kernel"
+    KEFFECTIVE_VERSION="$KSP_V"
+  fi 
 fi	
 
 KMONITORBY="${OSNAME}${OSVERSION}"
