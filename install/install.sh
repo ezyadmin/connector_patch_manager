@@ -72,20 +72,20 @@ Main_Install()
   chmod 755 -R script
 
   EZBIN=/usr/local/bin/ezinstall_patch_mgr
-  if [ ! -h $EZBIN ]; then
-    echo "=> File doesn't exist"
-
+  if [ ! -e $EZBIN ]; then
+    echo "=> create symbolic"
+    ln -sf /usr/local/ezyadmin/connector_patch_manager-latest/script/ezinstall_patch_mgr /usr/local/bin/ezinstall_patch_mgr
     # default file connector_patch_manager-latest
-    FILE=/usr/local/ezyadmin/connector_patch_manager-latest/script/ezinstall_patch_mgr
-    if test -f "$FILE"; then
-        ln -s /usr/local/ezyadmin/connector_patch_manager-latest/script/ezinstall_patch_mgr /usr/local/bin/ezinstall_patch_mgr
-    fi
+    # FILE=/usr/local/ezyadmin/connector_patch_manager-latest/script/ezinstall_patch_mgr
+    # if test -f "$FILE"; then
+    #     ln -sf /usr/local/ezyadmin/connector_patch_manager-latest/script/ezinstall_patch_mgr /usr/local/bin/ezinstall_patch_mgr
+    # fi
 
     # dir connector_patch_manager
-    FILE=/usr/local/ezyadmin/connector_patch_manager/script/ezinstall_patch_mgr
-    if test -f "$FILE"; then
-        ln -s /usr/local/ezyadmin/connector_patch_manager/script/ezinstall_patch_mgr /usr/local/bin/ezinstall_patch_mgr
-    fi
+    # FILE=/usr/local/ezyadmin/connector_patch_manager/script/ezinstall_patch_mgr
+    # if test -f "$FILE"; then
+    #     ln -s /usr/local/ezyadmin/connector_patch_manager/script/ezinstall_patch_mgr /usr/local/bin/ezinstall_patch_mgr
+    # fi
 
     # ln -s /usr/local/ezyadmin/connector_patch_manager/script/ezinstall_patch_mgr /usr/local/bin/ezinstall_patch_mgr
   fi
