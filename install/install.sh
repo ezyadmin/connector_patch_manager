@@ -22,7 +22,7 @@ Check_Support()
   fi
   # echo "${green}TMP_YUM ${TMP_YUM}="
 
-  OSNAME=`perl ../agent/get_os.pl`
+  OSNAME=`perl /usr/local/ezyadmin/connector_patch_manager-latest/agent/get_os.pl`
   OSVERSION=""
   if [[ "${OSNAME}" == "centos" ]] ;then
     OSNAME="CentOS"
