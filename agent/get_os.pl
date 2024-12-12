@@ -48,7 +48,8 @@ our %release_files = (
     'pardus-release'        => 'pardus',
     'system-release'        => 'amazon',
     'CloudLinux-release'    => 'CloudLinux',
-    'cloudlinux-release'    => 'cloudlinux-release'
+    'cloudlinux-release'    => 'cloudlinux-release',
+    'almalinux-release'    => 'almalinux-release'
 );
 
 our %version_match = (
@@ -65,7 +66,8 @@ our %version_match = (
     'scientific'            => '^Scientific Linux release (.+) \(',
     'amazon'                => 'Amazon Linux AMI release (.+)$',
     'CloudLinux'            => 'CloudLinux Server release (\S+)',
-    'cloudlinux-release'    => 'CloudLinux release (\S+)'
+    'cloudlinux-release'    => 'CloudLinux release (\S+)',
+    'almalinux-release'    => 'AlmaLinux release (\S+)'
 );
 
 
