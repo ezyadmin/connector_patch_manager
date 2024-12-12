@@ -49,7 +49,7 @@ our %release_files = (
     'system-release'        => 'amazon',
     'CloudLinux-release'    => 'CloudLinux',
     'cloudlinux-release'    => 'cloudlinux-release',
-    'almalinux-release'    => 'almalinux-release'
+    'almalinux-release'    => 'almalinux'
 );
 
 our %version_match = (
@@ -67,7 +67,7 @@ our %version_match = (
     'amazon'                => 'Amazon Linux AMI release (.+)$',
     'CloudLinux'            => 'CloudLinux Server release (\S+)',
     'cloudlinux-release'    => 'CloudLinux release (\S+)',
-    'almalinux-release'    => 'AlmaLinux release (\S+)'
+    'almalinux'    => 'AlmaLinux release (\S+)'
 );
 
 
