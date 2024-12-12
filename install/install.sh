@@ -33,6 +33,9 @@ Check_Support()
   elif [[ "${OSNAME}" == "cloudlinux" ]]; then
     OSNAME="CloudLinux"
     OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release | awk -F. '{print $1}' | tr -d "\n"`
+  elif [[ "${OSNAME}" == "almalinux" ]]; then
+    OSNAME="almalinux"
+    OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release | awk -F. '{print $1}' | tr -d "\n"`
   else
     echo "${red}Error : Operating system is not support.${reset}"
     echo "${red}OS : ${OSNAME}${reset}"
