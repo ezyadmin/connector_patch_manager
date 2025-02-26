@@ -135,9 +135,9 @@ check_support()
   elif [[ "${OSNAME}" == "cloudlinux" ]]; then
     OSNAME="CloudLinux"
     OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release | awk -F. '{print $1}' | tr -d "\n"`
-	elif [[ "${OSNAME}" == "almalinux" ]]; then
-		OSNAME="Almalinux"
-		OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release | awk -F. '{print $1}' | tr -d "\n"`
+  elif [[ "${OSNAME}" == "almalinux" ]]; then
+    OSNAME="Almalinux"
+    OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release | awk -F. '{print $1}' | tr -d "\n"`
   else
     echo "${red}Error : Operating system is not support.${reset}"
     echo "${red}OS : ${OSNAME}${reset}"
@@ -191,7 +191,7 @@ setup_respo()
   else
     echo "${red}Error : Operating system is not support.${reset}"
     echo "${red}OS : ${OSNAME}${reset}"
-		echo "${red}Version : ${OSVERSION}${reset}"
+    echo "${red}Version : ${OSVERSION}${reset}"
     echo "Please concact us."
     exit;
   fi
