@@ -33,6 +33,9 @@ Check_Support()
   elif [[ "${OSNAME}" == "cloudlinux" ]]; then
     OSNAME="CloudLinux"
     OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release | awk -F. '{print $1}' | tr -d "\n"`
+    if [ -z "$OSVERSION" ]; then
+      OSVERSION=$(rpm -q --qf "%{VERSION}" cloudlinux-release 2>/dev/null | awk -F. '{print $1}' | tr -d "\n")
+    fi
   elif [[ "${OSNAME}" == "almalinux" ]]; then
     OSNAME="almalinux"
     OSVERSION=`rpm -q --queryformat '%{VERSION}' epel-release | awk -F. '{print $1}' | tr -d "\n"`
